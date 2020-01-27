@@ -26,7 +26,7 @@ def plotFuncs(functions, bottom, top, N=1000, legend_kwds=None):
 
 st.header("Hello Hark!")
 
-parameterSets = st.slider("Parameter sets:", 1, 5)
+parameterSets = st.slider("Parameter sets:", 1, 5, 2)
 
 baseParams = {
     "CRRA": 2.5,
@@ -45,9 +45,9 @@ for i in range(parameterSets):
     st.markdown(f"#### Parameter Set {i + 1}:")
     params = copy.deepcopy(baseParams)
     params["Rfree"] = st.slider(
-        "Interest factor", 1.0, 1.5, 1.03, key=f"rfree{i}")
+        "Interest factor", 1.0, 1.5, 1.03 + i * .03, key=f"rfree{i}")
     params["PermGroFac"] = [
-        st.slider("Growth factor", 1.0, 1.2, 1.01, key=f"growth{i}")
+        st.slider("Growth factor", 1.0, 1.2, 1.01 + i * .03, key=f"growth{i}")
     ]
     paramsList.append(params)
 

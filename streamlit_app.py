@@ -1,8 +1,43 @@
+import matplotlib.pyplot as plt
+import numpy as np
 import streamlit as st
 import HARK as hark
 
 from HARK.ConsumptionSaving.ConsIndShockModel import PerfForesightConsumerType
 from HARK.utilities import plotFuncs
+
+def plotFuncs(functions,bottom, top, N=1000, legend_kwds=None):
+    '''
+    Plots 1D function(s) over a given range.
+    Parameters
+    ----------
+    functions : [function] or function
+        A single function, or a list of functions, to be plotted.
+    bottom : float
+        The lower limit of the domain to be plotted.
+    top : float
+        The upper limit of the domain to be plotted.
+    N : int
+        Number of points in the domain to evaluate.
+    legend_kwds: None, or dictionary
+        If not None, the keyword dictionary to pass to plt.legend
+    Returns
+    -------
+    none
+    '''
+    if type(functions)==list:
+        function_list = functions
+    else:
+        function_list = [functions]
+
+    for function in function_list:
+        x = np.linspace(bottom,top,N,endpoint=True)
+        y = function(x)
+        plt.plot(x,y)
+    plt.xlim([bottom, top])
+    if legend_kwds is not None:
+        plt.legend(**legend_kwds)
+    return plt
 
 st.header("Hello Hark!")
 
@@ -24,10 +59,6 @@ PFexample.solve()
 
 # PFexample.solution[0].cFunc
 
-#st.write("Plot funcs")
-#plotFuncs(PFexample.solution[0].cFunc, 0.0, 10)
-#st.write("Plotted funcs")
-
 st.write(
     f"This agent's human wealth is {PFexample.solution[0].hNrm:.02f} times "
     f"his current income level."
@@ -36,3 +67,5 @@ st.write(
     f"This agent's consumption function is defined (consumption is positive) "
     f"down to m_t = {PFexample.solution[0].mNrmMin:.02f}"
 )
+
+st.pyplot(plotFuncs(PFexample.solution[0].cFunc, 0.0, 10))

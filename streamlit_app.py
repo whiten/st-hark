@@ -26,7 +26,7 @@ def plotFuncs(functions, bottom, top, N=1000, legend_kwds=None):
 
 st.header("Hello Hark!")
 
-parameterSets = st.slider("Parameter sets:", 1, 5, 2)
+parameterSets = st.sidebar.slider("Parameter sets:", 1, 5, 2)
 
 baseParams = {
     "CRRA": 2.5,
@@ -42,24 +42,26 @@ baseParams = {
 
 examples = []
 for i in range(parameterSets):
-    st.markdown(f"#### Parameter Set {i + 1}:")
+    st.sidebar.markdown(f"#### Parameter Set {i + 1}:")
     params = copy.deepcopy(baseParams)
-    params["Rfree"] = st.slider(
+    params["Rfree"] = st.sidebar.slider(
         "Interest factor", 1.0, 1.5, 1.03 + i * 0.03, key=f"rfree{i}"
     )
     params["PermGroFac"] = [
-        st.slider("Growth factor", 1.0, 1.2, 1.01 + i * 0.03, key=f"growth{i}")
+        st.sidebar.slider(
+            "Growth factor", 1.0, 1.2, 1.01 + i * 0.03, key=f"growth{i}"
+        )
     ]
-    shocks = st.checkbox("Apply income shocks?", key=f"shocks{i}")
+    shocks = st.sidebar.checkbox("Apply income shocks?", key=f"shocks{i}")
     if shocks:
         params["PermShkStd"] = [
-            st.slider(
+            st.sidebar.slider(
                 "Permanent Income Shock", 0.0, 0.5, 0.1, key=f"PermShkStd{i}"
             )
         ]
         params["PermShkCount"] = 7
         params["TranShkStd"] = [
-            st.slider(
+            st.sidebar.slider(
                 "Transitory Income Shock", 0.0, 0.5, 0.1, key=f"TranShkStd{i}"
             )
         ]
@@ -88,14 +90,14 @@ for i in range(parameterSets):
         example = ConsIndShockModel.PerfForesightConsumerType(**params)
     example.solve()
     examples.append(example)
+    st.markdown(f"#### Solution {1 + i}")
     st.write(
-        f"**This agent's human wealth is {example.solution[0].hNrm:.02f} times "
-        f"his current income level.**"
+        f"This agent's human wealth is {example.solution[0].hNrm:.02f} times "
+        f"his current income level."
     )
     st.write(
-        f"**This agent's consumption function is defined (consumption is "
-        f"positive) down to m_t = {example.solution[0].mNrmMin:.02f}**"
+        f"This agent's consumption function is defined (consumption is "
+        f"positive) down to m_t = {example.solution[0].mNrmMin:.02f}"
     )
 
-st.markdown("### Plot")
 st.pyplot(plotFuncs([e.solution[0].cFunc for e in examples], 0.0, 10))

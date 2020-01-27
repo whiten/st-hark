@@ -1,3 +1,4 @@
+import copy
 import matplotlib.pyplot as plt
 import numpy as np
 import streamlit as st
@@ -6,66 +7,64 @@ import HARK as hark
 from HARK.ConsumptionSaving.ConsIndShockModel import PerfForesightConsumerType
 from HARK.utilities import plotFuncs
 
-def plotFuncs(functions,bottom, top, N=1000, legend_kwds=None):
-    '''
-    Plots 1D function(s) over a given range.
-    Parameters
-    ----------
-    functions : [function] or function
-        A single function, or a list of functions, to be plotted.
-    bottom : float
-        The lower limit of the domain to be plotted.
-    top : float
-        The upper limit of the domain to be plotted.
-    N : int
-        Number of points in the domain to evaluate.
-    legend_kwds: None, or dictionary
-        If not None, the keyword dictionary to pass to plt.legend
-    Returns
-    -------
-    none
-    '''
-    if type(functions)==list:
+
+def plotFuncs(functions, bottom, top, N=1000, legend_kwds=None):
+    if isinstance(functions, list):
         function_list = functions
     else:
         function_list = [functions]
 
     for function in function_list:
-        x = np.linspace(bottom,top,N,endpoint=True)
+        x = np.linspace(bottom, top, N, endpoint=True)
         y = function(x)
-        plt.plot(x,y)
+        plt.plot(x, y)
     plt.xlim([bottom, top])
     if legend_kwds is not None:
         plt.legend(**legend_kwds)
     return plt
 
+
 st.header("Hello Hark!")
 
-PF_dictionary = {
-    "CRRA": 2.5, # st.slider("Risk aversion (CRRA)", 0.0, 10.0, 2.5),
-    "DiscFac": .96, #st.slider("Discount factor", 0.0, 1.0, 0.96),
+parameterSets = st.slider("Parameter sets:", 1, 5)
+
+baseParams = {
+    "CRRA": 2.5,
+    "DiscFac": 0.96,
     "Rfree": 1.03,
-    "Rfree": st.slider("Interest factor", 1.0, 1.5, 1.03),
-    "LivPrb": [.98],
-    "PermGroFac": [st.slider("Growth factor", 1.0, 1.2, 1.01)],
+    "Rfree": 1.03,
+    "LivPrb": [0.98],
+    "PermGroFac": [1.01],
     "T_cycle": 1,
     "cycles": 0,
     "AgentCount": 10000,
 }
 
-PFexample = PerfForesightConsumerType(**PF_dictionary)
+paramsList = []
+for i in range(parameterSets):
+    st.markdown(f"#### Parameter Set {i + 1}:")
+    params = copy.deepcopy(baseParams)
+    params["Rfree"] = st.slider(
+        "Interest factor", 1.0, 1.5, 1.03, key=f"rfree{i}")
+    params["PermGroFac"] = [
+        st.slider("Growth factor", 1.0, 1.2, 1.01, key=f"growth{i}")
+    ]
+    paramsList.append(params)
 
-PFexample.solve()
+examples = []
+for i, params in enumerate(paramsList):
+    example = PerfForesightConsumerType(**params)
+    example.solve()
+    examples.append(example)
+    st.markdown(f"#### Solution {i + 1}:")
+    st.write(
+        f"This agent's human wealth is {example.solution[0].hNrm:.02f} times "
+        f"his current income level."
+    )
+    st.write(
+        f"This agent's consumption function is defined (consumption is "
+        f"positive) down to m_t = {example.solution[0].mNrmMin:.02f}"
+    )
 
-# PFexample.solution[0].cFunc
-
-st.write(
-    f"This agent's human wealth is {PFexample.solution[0].hNrm:.02f} times "
-    f"his current income level."
-)
-st.write(
-    f"This agent's consumption function is defined (consumption is positive) "
-    f"down to m_t = {PFexample.solution[0].mNrmMin:.02f}"
-)
-
-st.pyplot(plotFuncs(PFexample.solution[0].cFunc, 0.0, 10))
+st.markdown("### Plot")
+st.pyplot(plotFuncs([e.solution[0].cFunc for e in examples], 0.0, 10))

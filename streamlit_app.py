@@ -7,10 +7,11 @@ from HARK.utilities import plotFuncs
 st.header("Hello Hark!")
 
 PF_dictionary = {
-    "CRRA": st.slider("Risk aversion (CRRA)", 0.0, 10.0, 2.5),
-    "DiscFac": st.slider("Discount factor", 0.0, 1.0, 0.96),
+    "CRRA": 2.5, # st.slider("Risk aversion (CRRA)", 0.0, 10.0, 2.5),
+    "DiscFac": .96, #st.slider("Discount factor", 0.0, 1.0, 0.96),
     "Rfree": 1.03,
-    "LivPrb": [st.slider("Survival probability", 0.0, 1.0, 0.98)],
+    "Rfree": st.slider("Interest factor", 1.0, 1.5, 1.03),
+    "LivPrb": [.98],
     "PermGroFac": [st.slider("Growth factor", 1.0, 1.2, 1.01)],
     "T_cycle": 1,
     "cycles": 0,
